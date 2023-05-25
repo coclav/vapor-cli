@@ -76,6 +76,14 @@ class Docker
         )->setTimeout(null)->mustRun();
 
         Process::fromShellCommandline(
+            sprintf('docker tag %s %s',
+                Str::slug($project).':'.$environment,
+                $repoUri.':'.$environment.'-latest'
+            ),
+            $path
+        )->setTimeout(null)->mustRun();
+
+        Process::fromShellCommandline(
             sprintf('docker login --username AWS --password %s %s',
                 str_replace('AWS:', '', base64_decode($token)),
                 explode('/', $repoUri)[0]
@@ -84,8 +92,8 @@ class Docker
         )->setTimeout(null)->mustRun();
 
         Process::fromShellCommandline(
-            sprintf('docker push %s',
-                $repoUri.':'.$tag
+            sprintf('docker push --all-tags %s',
+                $repoUri
             ),
             $path
         )->setTimeout(null)->mustRun(function ($type, $line) {
